@@ -1,1 +1,306 @@
-# TodoList.CleanArch
+# TodoList Clean Architecture API
+
+**RESTful API** для управления задачами с поддержкой проектов, тегов и полноценной JWT-аутентификацией. Проект разработан на **ASP.NET Core 10** с использованием **Entity Framework Core**, **PostgreSQL** и **принципов Чистой Архитектуры**.
+
+---
+
+## 🚀 Технологии
+
+- **.NET 10** (ASP.NET Core Web API)
+- **Entity Framework Core** (ORM, Code First, Fluent API)
+- **PostgreSQL** (база данных)
+- **JWT** (аутентификация, Bearer токены)
+- **BCrypt.Net-Next** (хеширование паролей)
+- **Swagger / OpenAPI** (документация)
+- **System.Linq.Dynamic.Core** (динамическая сортировка)
+
+---
+
+## ✨ Функциональность
+
+### 🔐 Аутентификация и пользователи
+- Регистрация нового пользователя (с хешированием пароля)
+- Вход в систему (получение JWT-токена)
+- CRUD для пользователей (с защитой: пользователь может редактировать/удалять только себя)
+
+### 📁 Проекты
+- Создание, просмотр, обновление, удаление проектов
+- Привязка проектов к конкретному пользователю
+
+### ✅ Задачи
+- Создание, просмотр, обновление, удаление задач
+- Привязка задач к проекту
+- Добавление нескольких тегов к задаче
+- Фильтрация задач по тегам
+
+### 🏷️ Теги
+- Создание, просмотр, обновление, удаление тегов
+- Автоматическая проверка уникальности имени тега
+- Защита от удаления тега, который используется в задачах
+
+### 🔍 Расширенная работа со списком задач
+- **Пагинация** – постраничный вывод с метаданными
+- **Фильтрация** – по поисковому запросу, статусу выполнения, диапазону дат
+- **Сортировка** – по заголовку, дате создания, статусу
+- **Динамические параметры** – все через query string
+
+---
+
+## 📦 Установка и запуск
+
+### Предварительные требования
+- Установленный [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- Установленный [PostgreSQL](https://www.postgresql.org/download/)
+- (Опционально) [Git](https://git-scm.com/)
+
+### Шаги
+
+1. **Клонировать репозиторий**
+   ```bash
+   git clone https://github.com/daniilfars/TodoList.git
+   cd TodoList
+   ```
+
+2. **Настроить базу данных и JWT**  
+   Скопируйте файл `appsettings.Example.json` в `appsettings.json` и заполните своими данными.
+
+3. **Применить миграции**
+   ```bash
+   dotnet ef database update
+   ```
+
+4. **Запустить приложение**
+   ```bash
+   dotnet run
+   ```
+
+5. **Открыть документацию Swagger**  
+   Перейдите по адресу `https://localhost:5001/swagger` (порт может отличаться)
+
+---
+
+## 📖 Использование API
+
+### 🔑 Аутентификация
+
+| Метод | Эндпоинт | Описание |
+|-------|----------|----------|
+| POST | `/api/auth/register` | Регистрация нового пользователя |
+| POST | `/api/auth/login` | Вход в систему (получение токена) |
+
+**Пример регистрации:**
+```json
+POST /api/auth/register
+{
+  "userName": "alice",
+  "email": "alice@example.com",
+  "password": "SecurePass123"
+}
+```
+
+**Ответ:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "name": "alice",
+    "email": "alice@example.com",
+    "createdAt": "2025-03-05T10:00:00Z"
+  }
+}
+```
+
+### 🔒 Защищённые эндпоинты
+
+Для всех запросов (кроме регистрации и входа) требуется заголовок:
+```
+Authorization: Bearer {ваш_токен}
+```
+
+---
+
+### 📁 Проекты
+
+| Метод | Эндпоинт | Описание |
+|-------|----------|----------|
+| GET | `/api/project` | Получить все проекты текущего пользователя |
+| GET | `/api/project/{id}` | Получить проект по ID |
+| POST | `/api/project` | Создать новый проект |
+| PUT | `/api/project/{id}` | Обновить проект |
+| DELETE | `/api/project/{id}` | Удалить проект |
+
+**Пример создания проекта:**
+```json
+POST /api/project
+{
+  "name": "Рабочие задачи",
+  "description": "Проекты по работе",
+  "userId": 1
+}
+```
+
+---
+
+### ✅ Задачи
+
+#### Базовые операции
+
+| Метод | Эндпоинт | Описание |
+|-------|----------|----------|
+| GET | `/api/task` | Получить задачи с пагинацией, фильтрацией и сортировкой |
+| GET | `/api/task/{id}` | Получить задачу по ID |
+| GET | `/api/task/bytag/{tagId}` | Получить задачи по тегу |
+| POST | `/api/task` | Создать задачу |
+| PUT | `/api/task/{id}` | Обновить задачу |
+| DELETE | `/api/task/{id}` | Удалить задачу |
+
+#### 📊 Пагинация, фильтрация и сортировка
+
+Эндпоинт `GET /api/task` поддерживает расширенные параметры запроса:
+
+| Параметр | Тип | Описание | Пример |
+|----------|-----|----------|--------|
+| `pageNumber` | int | Номер страницы (по умолчанию 1) | `?pageNumber=2` |
+| `pageSize` | int | Размер страницы (макс. 50, по умолч. 10) | `?pageSize=5` |
+| `searchTerm` | string | Поиск по заголовку и описанию | `?searchTerm=купить` |
+| `isCompleted` | bool | Фильтр по статусу выполнения | `?isCompleted=false` |
+| `fromDate` | date | Задачи, созданные после даты (YYYY-MM-DD) | `?fromDate=2026-03-01` |
+| `toDate` | date | Задачи, созданные до даты | `?toDate=2026-03-10` |
+| `sortBy` | string | Поле для сортировки (`title`, `createdAt`, `isCompleted`) | `?sortBy=createdAt` |
+| `sortOrder` | string | Направление (`asc` или `desc`, по умолч. `asc`) | `?sortOrder=desc` |
+
+**Пример запроса с пагинацией и фильтрацией:**
+```
+GET /api/task?searchTerm=купить&isCompleted=false&sortBy=createdAt&sortOrder=desc&pageNumber=2&pageSize=5
+```
+
+**Формат ответа:**
+```json
+{
+  "items": [ ... задачи ... ],
+  "pageNumber": 2,
+  "pageSize": 5,
+  "totalCount": 47,
+  "totalPages": 10,
+  "hasPreviousPage": true,
+  "hasNextPage": true
+}
+```
+
+**Пример создания задачи с тегами:**
+```json
+POST /api/task
+{
+  "title": "Изучить EF Core",
+  "description": "Прочитать документацию",
+  "projectId": 1,
+  "tagIds": [1, 2]
+}
+```
+
+---
+
+### 🏷️ Теги
+
+| Метод | Эндпоинт | Описание |
+|-------|----------|----------|
+| GET | `/api/tag` | Получить все теги |
+| GET | `/api/tag/{id}` | Получить тег по ID |
+| GET | `/api/tag/{tagId}/tasks` | Получить задачи по тегу |
+| POST | `/api/tag` | Создать тег |
+| PUT | `/api/tag/{id}` | Обновить тег |
+| DELETE | `/api/tag/{id}` | Удалить тег |
+
+---
+
+### 👥 Пользователи
+
+| Метод | Эндпоинт | Описание |
+|-------|----------|----------|
+| GET | `/api/user` | Получить всех пользователей |
+| GET | `/api/user/{id}` | Получить пользователя по ID |
+| POST | `/api/user` | Создать пользователя (для администрирования) |
+| PUT | `/api/user/{id}` | Обновить пользователя |
+| DELETE | `/api/user/{id}` | Удалить пользователя |
+
+⚠️ Пользователь может редактировать и удалять только свою учётную запись.
+
+---
+
+## 🔐 Права доступа
+
+- Каждый пользователь видит, редактирует и удаляет **только свои проекты и задачи**
+- При создании задачи она автоматически привязывается к пользователю через проект
+- Доступ к чужим данным возвращает ошибку `403 Forbidden`
+
+---
+
+## 📁 Структура проекта
+
+```
+TodoList.CleanArch/ (Solution)
+├── 🔵 1. Domain (Ядро)
+│   ├── Models/          # Сущности (User, Project, TaskItem, Tag)
+│
+├── 🟡 2. Application (Логика и контракты)
+│   ├── Interfaces/        # Интерфейсы: IAppDbContext, IProjectService, ITagService и др.
+│   ├── DTOs/              # CreateDTO, UpdateDTO, ResponseDTO
+│   ├── RequestFeatures/    # TasgQueryParameters
+│
+├── 🔴 3. Infrastructure (Реализация)
+|   ├── Configurations/    # JwtSettings
+│   ├── Data/              # AppDbContext
+│   ├── Services/          # Реализация интерфейсов (ProjectService, TagService и др.)
+│   └── Migrations/          # Миграции
+│
+├── 🟢 4. WebAPI (Точка входа)
+│   ├── Controllers/       # Обработка HTTP-запросов
+│   ├── Program.cs         # Конфигурация DI, Middleware и конвейера ASP.NET Core
+│   └── appsettings.json   # Настройки БД, JWT и уровни логирования
+│
+└── 🧪 5. Infrastructure.UnitTests (Проект тестов, дорабатывается)
+    └── Services/          # Модульные тесты для сервисов из Infrastructure
+```
+
+---
+
+## 🧪 Тестирование
+
+Для тестирования API можно использовать:
+- **Postman** – скачать с [официального сайта](https://www.postman.com/)
+- **Swagger** – встроенный UI по адресу `/swagger`
+- **curl** – из командной строки
+
+Пример тестирования через **curl**:
+```bash
+# Получить токен
+curl -X POST https://localhost:5001/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"SecurePass123"}'
+
+# Создать проект (с токеном)
+curl -X POST https://localhost:5001/api/project \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Тест","description":"Описание","userId":1}'
+```
+
+---
+
+## 🤝 Вклад в проект
+
+Если вы нашли ошибку или хотите предложить улучшение:
+1. Создайте **Issue** в репозитории
+2. Или отправьте **Pull Request** с описанием изменений
+
+---
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией MIT.
+
+---
+
+**Автор:** Данииль  
+**GitHub:** [https://github.com/daniilfars/](https://github.com/daniilfars/)
