@@ -239,17 +239,6 @@ POST /api/task
 ## 📁 Структура проекта
 
 ```
-TodoList/
-├── Controllers/               # Эндпоинты API
-├── Data/                       # Контекст EF Core
-├── Models/                      # Сущности БД и DTO
-├── Services/                    # Бизнес-логика
-├── Configurations/              # Классы конфигурации
-├── Migrations/                   # Миграции EF Core
-├── Program.cs                    # Точка входа
-└── TodoList.csproj               # Файл проекта
-```
-
 TodoList.CleanArch/ (Solution)
 ├── 🔵 1. Domain (Ядро)
 │   ├── Models/          # Сущности (User, Project, TaskItem, Tag)
@@ -272,7 +261,7 @@ TodoList.CleanArch/ (Solution)
 │
 └── 🧪 5. Infrastructure.UnitTests (Проект тестов, дорабатывается)
     └── Services/          # Модульные тесты для сервисов из Infrastructure
-
+```
 
 ---
 
