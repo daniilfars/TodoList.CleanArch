@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Application.Interfaces;
 using Domain.Models;
 
 namespace Infrastructure.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : DbContext, IAppDbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Project> Projects { get; set; }

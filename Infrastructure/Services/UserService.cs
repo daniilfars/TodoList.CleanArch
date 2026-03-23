@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Models;
-using Infrastructure.Data;
 using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.UpdateDTOs;
@@ -11,9 +10,9 @@ namespace Infrastructure.Services;
 
 public class UserService : IUserService
 {
-    readonly AppDbContext db;
+    readonly IAppDbContext db;
 
-    public UserService(AppDbContext context)
+    public UserService(IAppDbContext context)
     {
         db = context;
     }

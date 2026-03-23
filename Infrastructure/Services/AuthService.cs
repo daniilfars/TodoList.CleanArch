@@ -1,7 +1,6 @@
 ﻿using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Domain.Models;
-using Infrastructure.Data;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.Jwt;
 using Application.Interfaces;
@@ -10,10 +9,10 @@ namespace Infrastructure.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _context;
+    private readonly IAppDbContext _context;
     private readonly ITokenService _tokenService;
 
-    public AuthService(AppDbContext context, ITokenService tokenService)
+    public AuthService(IAppDbContext context, ITokenService tokenService)
     {
         _context = context;
         _tokenService = tokenService;

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Models;
-using Infrastructure.Data;
 using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.UpdateDTOs;
@@ -10,9 +9,9 @@ namespace Infrastructure.Services;
 
 public class TagService : ITagService
 {
-    private readonly AppDbContext db;
+    private readonly IAppDbContext db;
 
-    public TagService(AppDbContext context)
+    public TagService(IAppDbContext context)
     {
         db = context;
     }
@@ -49,7 +48,7 @@ public class TagService : ITagService
         if (tag.Tasks.Any())
             throw new InvalidOperationException("Нельзя удалить тег, который используется в задачах.");
 
-        db.Remove(tag);
+        db.Tags.Remove(tag);
         await db.SaveChangesAsync();
 
         return true;

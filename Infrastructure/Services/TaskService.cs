@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
-using Infrastructure.Data;
 using Domain.Models;
 using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
@@ -12,9 +11,9 @@ namespace Infrastructure.Services;
 
 public class TaskService : ITaskService
 {
-    private readonly AppDbContext db;
+    private readonly IAppDbContext db;
 
-    public TaskService(AppDbContext context)
+    public TaskService(IAppDbContext context)
     {
         db = context;
     }
@@ -75,7 +74,7 @@ public class TaskService : ITaskService
         if (task == null)
             return false;
 
-        db.Remove(task);
+        db.Tasks.Remove(task);
         await db.SaveChangesAsync();
 
         return true;

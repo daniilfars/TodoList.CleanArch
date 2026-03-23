@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Models;
-using Infrastructure.Data;
 using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.UpdateDTOs;
@@ -10,9 +9,9 @@ namespace Infrastructure.Services;
 
 public class ProjectService : IProjectService
 {
-    private readonly AppDbContext db;
+    private readonly IAppDbContext db;
 
-    public ProjectService(AppDbContext context)
+    public ProjectService(IAppDbContext context)
     {
         db = context; 
     }
@@ -50,7 +49,7 @@ public class ProjectService : IProjectService
         if (project == null)
             return false;
 
-        db.Remove(project);
+        db.Projects.Remove(project);
         await db.SaveChangesAsync();
 
         return true;
