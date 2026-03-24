@@ -5,6 +5,7 @@ using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.UpdateDTOs;
 using Application.Interfaces;
+using Application.RequestFeatures;
 
 namespace WebAPI.Controllers;
 
@@ -23,9 +24,9 @@ public class ProjectController : ControllerBase
     // GET: api/project
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ResponseProjectDto>>> GetAll()
+    public async Task<ActionResult<ResponsePaged<ResponseProjectDto>>> GetAll(ProjectQueryParameters parameters)
     {
-        var items = await projectService.GetAllProjectsAsync();
+        var items = await projectService.GetAllProjectsAsync(parameters);
         return Ok(items);
     }
 
@@ -83,13 +84,13 @@ public class ProjectController : ControllerBase
 
     // GET: api/project/my
     [HttpGet("my")]
-    public async Task<ActionResult<IEnumerable<ResponseProjectDto>>> GetMyProjects()
+    public async Task<ActionResult<ResponsePaged<ResponseProjectDto>>> GetMyProjects([FromQuery] ProjectQueryParameters parameters)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (userId == null)
-            return Unauthorized();
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            return Unauthorized(new { message = "ID пользователя не найден в токене" });
 
-        var projects = await projectService.GetProjectsByUserIdAsync(int.Parse(userId));
+        var projects = await projectService.GetProjectsAsync(parameters, userId);
         return Ok(projects);
     }
 }

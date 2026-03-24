@@ -4,6 +4,7 @@ using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
 using Application.DTOs.UpdateDTOs;
 using Application.Interfaces;
+using Application.RequestFeatures;
 
 namespace Infrastructure.Services;
 
@@ -55,16 +56,48 @@ public class ProjectService : IProjectService
         return true;
     }
 
-    public async Task<IEnumerable<ResponseProjectDto>> GetAllProjectsAsync()
+    public async Task<ResponsePaged<ResponseProjectDto>> GetAllProjectsAsync(ProjectQueryParameters parameters)
     {
-        return await db.Projects.AsNoTracking().OrderByDescending(p => p.CreatedAt).Select(project => new ResponseProjectDto
-        {
-            Id = project.Id,
-            Name = project.Name,
-            Description = project.Description,
-            CreatedAt = project.CreatedAt,
-            UserId = project.UserId
-        }).ToListAsync();
+        IQueryable<Project> query = db.Projects.AsNoTracking().OrderByDescending(p => p.CreatedAt);
+
+        int totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+            .Take(parameters.PageSize)
+            .Select(p => new ResponseProjectDto
+            {
+                CreatedAt = p.CreatedAt,
+                Description = p.Description,
+                Id = p.Id,
+                Name = p.Name,
+                UserId = p.UserId
+            })
+            .ToListAsync();
+
+        return new ResponsePaged<ResponseProjectDto>(items, totalCount, parameters.PageNumber, parameters.PageSize);
+    }
+
+    public async Task<ResponsePaged<ResponseProjectDto>> GetProjectsAsync(ProjectQueryParameters parameters, int userId)
+    {
+        IQueryable<Project> query = db.Projects.Where(p => p.UserId == userId).AsNoTracking().OrderByDescending(p => p.CreatedAt);
+
+        int totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+            .Take(parameters.PageSize)
+            .Select(p => new ResponseProjectDto
+            {
+                CreatedAt = p.CreatedAt,
+                Description = p.Description,
+                Id = p.Id,
+                Name= p.Name,
+                UserId = p.UserId
+            })
+            .ToListAsync();
+
+        return new ResponsePaged<ResponseProjectDto>(items, totalCount, parameters.PageNumber, parameters.PageSize);
     }
 
     public async Task<ResponseProjectDto?> GetProjectByIdAsync(int id)
@@ -110,7 +143,7 @@ public class ProjectService : IProjectService
         };
     }
 
-    public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByUserIdAsync(int userId)
+    /*public async Task<IEnumerable<ResponseProjectDto>> GetProjectsByUserIdAsync(int userId)
     {
         return await db.Projects
             .Where(p => p.UserId == userId)
@@ -124,5 +157,5 @@ public class ProjectService : IProjectService
                 UserId = p.UserId
             })
             .ToListAsync();
-    }
+    }*/
 }
