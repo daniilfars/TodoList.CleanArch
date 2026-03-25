@@ -56,7 +56,7 @@ public class TaskController : ControllerBase
 
     // PUT: api/task/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateTaskDto updateDto)
+    public async Task<ActionResult> Update(int id, UpdateTaskDto updateDto)
     {
         try
         {

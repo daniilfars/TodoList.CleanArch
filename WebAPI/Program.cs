@@ -1,11 +1,11 @@
+using Application.Interfaces;
+using Infrastructure.Configurations;
+using Infrastructure.Data;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Infrastructure.Configurations;
-using Infrastructure.Data;
-using Infrastructure.Services;
-using Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

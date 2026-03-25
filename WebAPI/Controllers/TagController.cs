@@ -54,7 +54,7 @@ public class TagController : ControllerBase
 
     // PUT: api/tag/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateTagDto updateDto)
+    public async Task<ActionResult> Update(int id, UpdateTagDto updateDto)
     {
         try
         {

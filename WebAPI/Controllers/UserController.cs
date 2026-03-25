@@ -55,7 +55,7 @@ public class UserController : ControllerBase
 
     // PUT: api/user/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateUserDto updateDto)
+    public async Task<ActionResult> Update(int id, UpdateUserDto updateDto)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         var userRoleClaim = User.FindFirst(ClaimTypes.Role)?.Value;

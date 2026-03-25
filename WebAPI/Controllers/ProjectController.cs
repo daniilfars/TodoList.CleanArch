@@ -57,7 +57,7 @@ public class ProjectController : ControllerBase
 
     // PUT: api/project/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateProjectDto updateDto)
+    public async Task<ActionResult> Update(int id, UpdateProjectDto updateDto)
     {
         try
         {
