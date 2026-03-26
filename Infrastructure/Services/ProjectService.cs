@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 using Domain.Models;
 using Application.DTOs.CreateDTOs;
 using Application.DTOs.ResponseDTOs;
@@ -58,9 +59,32 @@ public class ProjectService : IProjectService
 
     public async Task<ResponsePaged<ResponseProjectDto>> GetAllProjectsAsync(ProjectQueryParameters parameters)
     {
-        IQueryable<Project> query = db.Projects.AsNoTracking().OrderByDescending(p => p.CreatedAt);
+        IQueryable<Project> query = db.Projects.AsNoTracking();
 
-        int totalCount = await query.CountAsync();
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            var term = parameters.SearchTerm.ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(term) || (p.Description != null && p.Description.ToLower().Contains(term)));
+        }
+
+        if (parameters.FromDate.HasValue)
+            query = query.Where(t => t.CreatedAt >= parameters.FromDate.Value);
+
+        if (parameters.ToDate.HasValue)
+        {
+            var toDateEnd = parameters.ToDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(t => t.CreatedAt <= toDateEnd);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            string orderBy = $"{parameters.SortBy} {parameters.SortOrder}";
+            query = query.OrderBy(orderBy);
+        }
+        else
+            query = query.OrderByDescending(t => t.CreatedAt);
 
         var items = await query
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)
@@ -80,9 +104,32 @@ public class ProjectService : IProjectService
 
     public async Task<ResponsePaged<ResponseProjectDto>> GetProjectsAsync(ProjectQueryParameters parameters, int userId)
     {
-        IQueryable<Project> query = db.Projects.Where(p => p.UserId == userId).AsNoTracking().OrderByDescending(p => p.CreatedAt);
+        IQueryable<Project> query = db.Projects.Where(p => p.UserId == userId).AsNoTracking();
 
-        int totalCount = await query.CountAsync();
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            var term = parameters.SearchTerm.ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(term) || (p.Description != null && p.Description.ToLower().Contains(term)));
+        }
+
+        if (parameters.FromDate.HasValue)
+            query = query.Where(t => t.CreatedAt >= parameters.FromDate.Value);
+
+        if (parameters.ToDate.HasValue)
+        {
+            var toDateEnd = parameters.ToDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(t => t.CreatedAt <= toDateEnd);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            string orderBy = $"{parameters.SortBy} {parameters.SortOrder}";
+            query = query.OrderBy(orderBy);
+        }
+        else
+            query = query.OrderByDescending(t => t.CreatedAt);
 
         var items = await query
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)

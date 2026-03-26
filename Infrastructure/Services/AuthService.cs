@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Domain.Models;
 using Application.DTOs.ResponseDTOs;
+using Application.DTOs.CreateDTOs;
 using Application.DTOs.Jwt;
 using Application.Interfaces;
 
@@ -11,52 +12,61 @@ public class AuthService : IAuthService
 {
     private readonly IAppDbContext _context;
     private readonly ITokenService _tokenService;
+    private readonly IUserService _userService;
 
-    public AuthService(IAppDbContext context, ITokenService tokenService)
+    public AuthService(IAppDbContext context, ITokenService tokenService, IUserService userService)
     {
         _context = context;
         _tokenService = tokenService;
+        _userService = userService;
     }
 
     public async Task<AuthResponse> RegisterAsync(RegisterDto registerDto)
     {
-        // Проверка на существующий email
-        var existingUser = await _context.Users
-            .FirstOrDefaultAsync(u => u.Email == registerDto.Email);
-        if (existingUser != null)
-            throw new InvalidOperationException("Пользователь с таким email уже существует.");
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        // Хеширование пароля
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
-
-        var user = new User
+        try
         {
-            Name = registerDto.UserName,
-            Email = registerDto.Email,
-            PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        if (user.Email == "admin@example.com")
-            user.Role = "Admin";
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        // Генерация токена
-        string token = _tokenService.GenerateToken(user);
-
-        return new AuthResponse
-        {
-            Token = token,
-            User = new ResponseUserDto
+            var user = await _userService.CreateUserAsync(new CreateUserDto
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt
-            }
-        };
+                Email = registerDto.Email,
+                Password = registerDto.Password,
+                UserName = registerDto.UserName
+            });
+
+            var defaultProject = new Project
+            {
+                Name = $"Проект {user.Email}",
+                Description = "Проект по умолчанию",
+                CreatedAt = DateTime.UtcNow,
+                UserId = user.Id
+            };
+
+            _context.Projects.Add(defaultProject);
+            await _context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            // Генерация токена
+            string token = _tokenService.GenerateToken(user);
+
+            return new AuthResponse
+            {
+                Token = token,
+                User = new ResponseUserDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    CreatedAt = user.CreatedAt
+                }
+            };
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<AuthResponse?> LoginAsync(LoginDto loginDto)

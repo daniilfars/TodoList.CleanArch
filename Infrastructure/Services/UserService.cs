@@ -16,7 +16,7 @@ public class UserService : IUserService
     {
         db = context;
     }
-    public async Task<ResponseUserDto> CreateUserAsync(CreateUserDto createUserDto)
+    public async Task<User> CreateUserAsync(CreateUserDto createUserDto)
     {
         User? existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == createUserDto.Email);
 
@@ -33,16 +33,13 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
+        if (user.Email == "admin@example.com")
+            user.Role = "Admin";
+
         db.Users.Add(user);
         await db.SaveChangesAsync();
 
-        return new ResponseUserDto
-        {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            CreatedAt = user.CreatedAt
-        };
+        return user;
     }
 
     public async Task<bool> DeleteUserAsync(int id)

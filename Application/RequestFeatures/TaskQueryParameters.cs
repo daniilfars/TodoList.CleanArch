@@ -19,7 +19,7 @@ public class TaskQueryParameters
         set => _sortBy = AllowedSortFields.Contains(value?.ToLower()) ? value.ToLower() : null;
     }
 
-    [RegularExpression("^(asc|desc)$", ErrorMessage = "SortOrder must be 'asc' or 'desc'")]
+    [RegularExpression("^(asc|desc)$", ErrorMessage = "Параметр SortOrder должен быть 'asc' или 'desc'")]
     public string? SortOrder { get; set; } = "asc";
 
     // Пагинация

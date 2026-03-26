@@ -24,7 +24,7 @@ public class ProjectController : ControllerBase
     // GET: api/project
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<ActionResult<ResponsePaged<ResponseProjectDto>>> GetAll(ProjectQueryParameters parameters)
+    public async Task<ActionResult<ResponsePaged<ResponseProjectDto>>> GetAll([FromQuery] ProjectQueryParameters parameters)
     {
         var items = await projectService.GetAllProjectsAsync(parameters);
         return Ok(items);
