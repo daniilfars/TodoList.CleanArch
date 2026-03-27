@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Application.DTOs.Jwt;
 using Application.Interfaces;
+using Domain.Models;
+using Application.DTOs;
 
 namespace WebAPI.Controllers;
 
@@ -41,5 +43,19 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid email or password" });
 
         return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(RefreshTokenDto refreshTokenDto)
+    {
+        try
+        {
+            var result = await _authService.RefreshTokenAsync(refreshTokenDto.RefreshToken);
+            return Ok(result);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { error = ex.Message });
+        }
     }
 }

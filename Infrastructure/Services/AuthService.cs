@@ -47,12 +47,17 @@ public class AuthService : IAuthService
 
             await transaction.CommitAsync();
 
-            // Генерация токена
             string token = _tokenService.GenerateToken(user);
+            string refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            await _context.SaveChangesAsync();
 
             return new AuthResponse
             {
                 Token = token,
+                RefreshToken = refreshToken,
                 User = new ResponseUserDto
                 {
                     Id = user.Id,
@@ -81,16 +86,50 @@ public class AuthService : IAuthService
             return null;
 
         string token = _tokenService.GenerateToken(user);
+        string refreshToken = _tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await _context.SaveChangesAsync();
 
         return new AuthResponse
         {
             Token = token,
+            RefreshToken = refreshToken,
             User = new ResponseUserDto
             {
                 Id = user.Id,
                 Name = user.Name,
                 Email = user.Email,
                 CreatedAt = user.CreatedAt
+            }
+        };
+    }
+
+    public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+        if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Недействительный или истекший refresh token");
+
+        var newAccessToken = _tokenService.GenerateToken(user);
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await _context.SaveChangesAsync();
+
+        return new AuthResponse
+        {
+            Token = newAccessToken,
+            RefreshToken = newRefreshToken,
+            User = new ResponseUserDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                CreatedAt = user.CreatedAt,
+                Email = user.Email
             }
         };
     }
