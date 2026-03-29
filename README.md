@@ -10,6 +10,7 @@
 - **Entity Framework Core** (ORM, Code First, Fluent API)
 - **PostgreSQL** (база данных)
 - **JWT** (аутентификация, Bearer токены)
+- **httpOnly cookies** — безопасное хранение JWT токенов (защита от XSS)
 - **BCrypt.Net-Next** (хеширование паролей)
 - **Swagger / OpenAPI** (документация)
 - **System.Linq.Dynamic.Core** (динамическая сортировка)
@@ -19,8 +20,8 @@
 ## ✨ Функциональность
 
 ### 🔐 Аутентификация и пользователи
-- JWT access token (15 минут)
-- Refresh token (7 дней) с хранением в БД
+- JWT access token (15 минут) в **httpOnly cookie** (защита от XSS)
+- Refresh token (7 дней) с хранением в БД и передачей через httpOnly cookie
 - Транзакционная регистрация (пользователь + проект по умолчанию)
 - BCrypt для хеширования паролей
 - CRUD для пользователей (с защитой: пользователь может редактировать/удалять только себя)
@@ -88,7 +89,7 @@
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
 | POST | `/api/auth/register` | Регистрация нового пользователя |
-| POST | `/api/auth/login` | Вход в систему (получение токена) |
+| POST | `/api/auth/login` | Вход в систему |
 
 **Пример регистрации:**
 ```json
@@ -103,7 +104,6 @@ POST /api/auth/register
 **Ответ:**
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
     "id": 1,
     "name": "alice",
@@ -113,12 +113,12 @@ POST /api/auth/register
 }
 ```
 
+> ⚠️ **Важно:** Токены аутентификации (`accessToken` и `refreshToken`) устанавливаются автоматически в **httpOnly cookies** и не возвращаются в теле ответа. Браузер сам будет отправлять их при каждом запросе.
+
 ### 🔒 Защищённые эндпоинты
 
-Для всех запросов (кроме регистрации и входа) требуется заголовок:
-```
-Authorization: Bearer {ваш_токен}
-```
+Все эндпоинты, кроме `/api/auth/register` и `/api/auth/login`, требуют аутентификации.  
+Токен доступа автоматически отправляется браузером в **httpOnly cookie** — добавлять заголовок `Authorization` вручную **не нужно**.
 
 ---
 
@@ -248,7 +248,7 @@ TodoList.CleanArch/ (Solution)
 ├── 🟡 2. Application (Логика и контракты)
 │   ├── Interfaces/        # Интерфейсы: IAppDbContext, IProjectService, ITagService и др.
 │   ├── DTOs/              # CreateDTO, UpdateDTO, ResponseDTO
-│   ├── RequestFeatures/    # TasgQueryParameters
+│   ├── RequestFeatures/    # TaskQueryParameters, ProjectQueryParameters
 │
 ├── 🔴 3. Infrastructure (Реализация)
 |   ├── Configurations/    # JwtSettings
@@ -274,19 +274,7 @@ TodoList.CleanArch/ (Solution)
 - **Swagger** – встроенный UI по адресу `/swagger`
 - **curl** – из командной строки
 
-Пример тестирования через **curl**:
-```bash
-# Получить токен
-curl -X POST https://localhost:5001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"SecurePass123"}'
-
-# Создать проект (с токеном)
-curl -X POST https://localhost:5001/api/project \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Тест","description":"Описание","userId":1}'
-```
+> ⚠️ **Для curl с cookies нужна дополнительная настройка. Рекомендуется использовать Postman или Swagger для тестирования.**
 
 ---
 
@@ -306,3 +294,4 @@ curl -X POST https://localhost:5001/api/project \
 
 **Автор:** Данииль  
 **GitHub:** [https://github.com/daniilfars/](https://github.com/daniilfars/)
+```
