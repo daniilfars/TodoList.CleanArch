@@ -294,4 +294,3 @@ TodoList.CleanArch/ (Solution)
 
 **Автор:** Данииль  
 **GitHub:** [https://github.com/daniilfars/](https://github.com/daniilfars/)
-```
