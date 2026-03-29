@@ -23,6 +23,7 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _authService.RegisterAsync(registerDto);
+            SetTokenCookies(result.Token, result.RefreshToken);
             return CreatedAtAction(nameof(Register), new { email = result.User?.Email }, result);
         }
         catch (InvalidOperationException ex)
@@ -31,7 +32,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception)
         {
-            return StatusCode(500, new { message = "Internal server error" });
+            return StatusCode(500, new { message = "Внутренняя ошибка сервера" });
         }
     }
 
@@ -40,22 +41,47 @@ public class AuthController : ControllerBase
     {
         var result = await _authService.LoginAsync(loginDto);
         if (result == null)
-            return Unauthorized(new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Неверный email или пароль" });
 
-        return Ok(result);
+        SetTokenCookies(result.Token, result.RefreshToken);
+
+        return Ok(result.User);
     }
 
     [HttpPost("refresh")]
-    public async Task<ActionResult<AuthResponse>> Refresh(RefreshTokenDto refreshTokenDto)
+    public async Task<ActionResult<AuthResponse>> Refresh()
     {
         try
         {
-            var result = await _authService.RefreshTokenAsync(refreshTokenDto.RefreshToken);
-            return Ok(result);
+            var result = await _authService.RefreshTokenAsync(Request.Cookies["refreshToken"]);
+            SetTokenCookies(result.Token, result.RefreshToken);
+            return Ok(result.User);
         }
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { error = ex.Message });
         }
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("accessToken");
+        Response.Cookies.Delete("refreshToken");
+        return Ok(new { message = "Успешный выход из системы" });
+    }
+
+    private void SetTokenCookies(string accessToken, string refreshToken)
+    {
+        var options = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
+        };
+
+        Response.Cookies.Append("accessToken", accessToken, options);
+        Response.Cookies.Append("refreshToken", refreshToken, options);
     }
 }

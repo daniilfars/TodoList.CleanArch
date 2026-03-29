@@ -1,5 +1,5 @@
 ﻿
-namespace Application.DTOs;
+namespace Application.DTOs.Jwt;
 
 public class RefreshTokenDto
 {
