@@ -7,7 +7,7 @@ using Application.Interfaces;
 using Application.DTOs.CreateDTOs;
 using Domain.Models;
 
-namespace Infrastructure.UnitTests.Services;
+namespace web_api_tests.Services;
 
 public class TagServiceTests
 {
