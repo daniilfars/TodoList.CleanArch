@@ -141,7 +141,7 @@ public class AuthServiceTests
     }
 
     [Fact]
-    public async Task RegisterAsync_ValidCredentials_ReturnsAuthResponse()
+    public async Task RegisterAsync_ValidData_ReturnsAuthResponse()
     {
         // arrange
         var connection = new SqliteConnection("DataSource=:memory:");
