@@ -3,7 +3,6 @@ using Domain.Models;
 using FluentAssertions;
 using Infrastructure.Data;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi;
 using System.Net;
 using System.Net.Http.Json;
 using web_api_tests.Helpers;

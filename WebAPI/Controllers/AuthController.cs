@@ -76,7 +76,7 @@ public class AuthController : ControllerBase
         var options = new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
+            Secure = HttpContext.Request.IsHttps, // Для тестов
             SameSite = SameSiteMode.Strict,
             Path = "/"
         };
