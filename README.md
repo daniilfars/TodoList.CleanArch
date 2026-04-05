@@ -74,38 +74,46 @@ dotnet test
 
 ---
 
+```
 ## 📦 Установка и запуск
 
 ### Предварительные требования
 - Установленный [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Установленный [PostgreSQL](https://www.postgresql.org/download/)
+- Установленный [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - (Опционально) [Git](https://git-scm.com/)
 
-### Шаги
+### Запуск через Docker Compose (рекомендуется)
 
-1. **Клонировать репозиторий**
-   ```bash
-   git clone https://github.com/daniilfars/TodoList.git
-   cd TodoList
-   ```
+```bash
+docker-compose up -d
+```
 
-2. **Настроить базу данных и JWT**  
-   Скопируйте файл `appsettings.Example.json` в `appsettings.json` и заполните своими данными.
+Swagger будет доступен по адресу: `http://localhost:8080/swagger`
 
-3. **Применить миграции**
-   ```bash
-   dotnet ef database update
-   ```
+### Остановка
 
-4. **Запустить приложение**
-   ```bash
-   dotnet run
-   ```
+```bash
+docker-compose down
+```
 
-5. **Открыть документацию Swagger**  
-   Перейдите по адресу `https://localhost:5001/swagger` (порт может отличаться)
+### Остановка с удалением данных БД
 
----
+```bash
+docker-compose down -v
+```
+
+### Пересборка после изменений в коде
+
+```bash
+docker-compose up --build -d
+```
+
+### Что внутри
+
+- API — порт `8080`
+- PostgreSQL — порт `5433` (не конфликтует с локальной БД)
+- Миграции применяются автоматически при запуске
+- Данные БД сохраняются между перезапусками
 
 ## 📖 Использование API
 
