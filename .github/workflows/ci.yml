@@ -36,11 +36,12 @@ jobs:
         run: dotnet build TodoListCleanArch.sln --no-restore --configuration Release
 
       - name: Test
-        run: |
-          dotnet test TodoListCleanArch.sln --no-build \
+  	run: |
+    	  dotnet test TodoListCleanArch.sln --no-build \
             --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --logger "trx;LogFileName=test-results.trx"
+      	    --verbosity normal \
+      	    --collect:"XPlat Code Coverage" \
+      	    --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
