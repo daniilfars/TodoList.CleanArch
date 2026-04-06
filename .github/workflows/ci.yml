@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 env:
   DOTNET_VERSION: '8.0.x'
@@ -72,3 +73,4 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/todolist-api:latest
             ${{ secrets.DOCKER_USERNAME }}/todolist-api:${{ github.sha }}
+
