@@ -30,10 +30,10 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Restore
-        run: dotnet restore TodoList.CleanArch.sln
+        run: dotnet restore TodoListCleanArch.sln
 
       - name: Build
-        run: dotnet build TodoList.CleanArch.sln --no-restore --configuration Release
+        run: dotnet build TodoListCleanArch.sln --no-restore --configuration Release
 
       - name: Test
         run: |
