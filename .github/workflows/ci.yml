@@ -30,15 +30,15 @@ jobs:
           restore-keys: ${{ runner.os }}-nuget-
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore TodoList.CleanArch.sln
 
       - name: Build
-        run: dotnet build --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
+        run: dotnet build TodoList.CleanArch.sln --no-restore --configuration Release
 
       - name: Test
         run: |
-          dotnet test --no-build \
-            --configuration ${{ env.BUILD_CONFIGURATION }} \
+          dotnet test TodoList.CleanArch.sln --no-build \
+            --configuration Release \
             --collect:"XPlat Code Coverage" \
             --logger "trx;LogFileName=test-results.trx"
 
