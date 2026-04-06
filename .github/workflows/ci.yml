@@ -37,7 +37,7 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test TodoList.CleanArch.sln --no-build \
+          dotnet test TodoListCleanArch.sln --no-build \
             --configuration Release \
             --collect:"XPlat Code Coverage" \
             --logger "trx;LogFileName=test-results.trx"
