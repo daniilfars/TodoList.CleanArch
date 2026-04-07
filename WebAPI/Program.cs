@@ -21,7 +21,7 @@ if (jwtSettings == null || string.IsNullOrEmpty(jwtSettings.SecretKey))
         SecretKey = "A_Very_Long_Secret_Key_For_Testing_Purposes_32_Chars_Minimum",
         Issuer = "TodoListAPI",
         Audience = "TodoListAPI",
-        ExpiryMinutes = 60
+        ExpiryMinutes = 15
     };
 }
 
